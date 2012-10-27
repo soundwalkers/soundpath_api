@@ -7,6 +7,14 @@ gem 'rails', '3.2.8'
 
 gem 'pg'
 
+gem 'thin'
+
+gem 'fql'
+
+group :development do
+  gem 'rest-client'
+end
+
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
