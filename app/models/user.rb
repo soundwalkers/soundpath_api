@@ -7,6 +7,7 @@ class User < ActiveRecord::Base
   # gets the calling user or creates a new one if it doesn't exist,
   # based on it's facebook uir
   def self.get_user(uid, token)
+    return nil if uid.blank? || token.blank?
     u = User.where(facebook_id: uid).first_or_initialize
     u.token = token
     u.save!

@@ -1,15 +1,15 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
-  before_filter :add_token #dev hack
+  #before_filter :add_token #dev hack
 
   def add_token
-    if params[:token].blank?
-      params[:token] = "BAAGm65u5qXgBAJ0RZCiIIKbOyaZApEKfYotSGaXrw03HZB09EP7KykNC8Wt7Puz1XJex5SDRtgH62TBZC7fzdbFfYBzibWRwjT6Uvlx4YmKCIs7CWHdh2ig6TALdqgXKPHSc3MTvNQZDZD"
-    end
-    if params[:uid].blank?
-      params[:uid] = '1274334424'
-    end
+   #if params[:token].blank?
+   #  params[:token] = "BAAGm65u5qXgBAJ0RZCiIIKbOyaZApEKfYotSGaXrw03HZB09EP7KykNC8Wt7Puz1XJex5SDRtgH62TBZC7fzdbFfYBzibWRwjT6Uvlx4YmKCIs7CWHdh2ig6TALdqgXKPHSc3MTvNQZDZD"
+   #end
+   #if params[:uid].blank?
+   #  params[:uid] = '1274334424'
+   #end
   end
 
   def current_user
@@ -17,6 +17,7 @@ class ApplicationController < ActionController::Base
   end
 
   def require_user
+    Rails.logger.info params.inspect
     raise_soundpath_error(SoundpathError.new(SoundpathError::UNAUTHORIZED_REQUEST ))  unless current_user.present?
   end
 
