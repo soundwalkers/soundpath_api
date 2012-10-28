@@ -7,16 +7,16 @@ class LastfmWorker
   def work!
     @bands.each do |b|
       band_match = LastfmBand.search(b.name)
+      Rails.logger.info band_match.inspect
       next if band_match.blank?
-      lastfm_data = LastfmBand.find(band_match['name'])
-      puts lastfm_data['stats'].inspect
-      band = Band.where(page_id: b.page_id).first
-      band.lastfm_url = lastfm_data['url']
-      band.mbid       = lastfm_data['mbid']
-      band.plays      = lastfm_data['stats']['playcount']
-      band.listeners  = lastfm_data['stats']['listeners']
-      puts band.inspect
+      lastfm_band = LastfmBand.find(band_match['name'])
+      b.lastfm_url   = lastfm_band.url
+      b.mbid         = lastfm_band.mbid
+      b.plays        = lastfm_band.plays
+      b.listeners    = lastfm_band.listeners
+      b.lastfm_name  = lastfm_band.name
     end
+    @bands
   end
 
   def self.perform(bands)

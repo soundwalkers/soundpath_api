@@ -27,4 +27,8 @@ class SoundpathError < StandardError
   RESOURCE_NOT_FOUND = [104, HTTP_NOT_FOUND, "Resource not found"]
   REQUEST_CONFLICT = [105, HTTP_CONFLICT, "Conflict"]
   FILE_UPLOAD_ERROR = [106, HTTP_INTERNAL_SERVER_ERROR, "Could not upload file" ]
+
+  #BAND ERRORS
+  BAND_NOT_FOUND = [201, HTTP_NOT_FOUND, "Band not found"]
+
 end

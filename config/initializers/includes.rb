@@ -6,3 +6,6 @@ require File.join(Rails.root, 'lib', 'lastfm',    'lastfm_band')
 
 # Resque Workers
 require File.join(Rails.root, 'app', 'workers',   'lastfm_worker')
+
+#Exceptions
+require File.join(Rails.root, 'lib', 'exceptions')
