@@ -45,7 +45,7 @@ class LastfmBand
     band.tracks = tracks
 
     tags_query = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist=#{URI::escape(band.name)}&api_key=#{$LAST_FM_API_KEY}&format=json"
-    tags = execute(tags_query)['toptags']['tag'].to(50).collect{|t| t['name']} rescue ''
+    tags = execute(tags_query)['toptags']['tag'].to(100).collect{|t| t['name']} rescue ''
 
     band.tags = tags
 

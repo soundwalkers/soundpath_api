@@ -1,6 +1,6 @@
 class BandsController < ApplicationController
   before_filter :require_user
-  respond_to :json
+  respond_to :json, :html
 
 
   # == Bands index

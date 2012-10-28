@@ -1,1 +1,16 @@
-SoundPath Api Readme
+SoundPath API Readme
+
+API backend for SoundPath iOS app.
+
+Purpose: relieve the load on the client, that means processing and api calls, and move it into the cloud.
+
+This API aggregates data from external services such as Last.fm and Facebook, computes various metrics and provides API calls to retrieve this.
+
+API calls:
+  *all calls require 2 parameters
+    -uid: User's Facebook ID
+    -token: User's Facebook authentication ID
+
+  GET: /bands - retrieves the first 5 bands that were liked by the user on Facebook, ranked by their fan count
+  GET: /bands/:page_id - retrieves detailed information about a specific band from it's Facebook page
+  GET: /bands/:band_id/related - retrieves data about bands that were liked by this band
