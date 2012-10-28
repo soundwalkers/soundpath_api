@@ -79,7 +79,7 @@ class BandsController < ApplicationController
       @band = Band.where(page_id: params[:id].to_s).first
       raise_soundpath_error(SoundpathError.new(SoundpathError::BAND_NOT_FOUND)) and return if @band.blank?
 
-      @bands = Band.get_related_for @band.page_id, current_user
+      @bands = Band.get_related_for @band, current_user
     rescue Fql::Exception => ex
       raise_soundpath_error(SoundpathError.new(SoundpathError::UNAUTHORIZED_REQUEST, ex.message))
       return

@@ -5,6 +5,13 @@ class Band < ActiveRecord::Base
   # age since last refresh used for data expiration
   EXPIRE_PERIOD = 1
 
+  SCORE_WEIGHTS = [
+    0.1, #likes
+    0.2, #listeners
+    0.1, #plays
+    0.6, #fanbase
+  ]
+
   # multi threaded refreshing of last fm data for the bands
   def self.refresh_lastfm!(bands)
     threads = []
@@ -31,12 +38,17 @@ class Band < ActiveRecord::Base
     return bands
   end
 
-  def self.get_related_for(page_id, user)
-    related_bands = FacebookBand.related(page_id, user.token)
+  # retrieves related bands for a specific band
+  # updates facebook and lastfm data, computers score
+  def self.get_related_for(band, user)
+    related_bands = FacebookBand.related(band.page_id, user.token)
     bands = create_bands(related_bands, user)
     bands = Band.refresh_lastfm!(bands)
+
+    bands.map{|b| b.update_score(band); }
+
     bands.map{|b| b.save!}
-    bands = bands.sort{|b, a| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
+    bands = bands.sort{|a, b| b.score <=> a.score}.to(4)
   end
 
   # retrieves details about the band
@@ -65,6 +77,10 @@ class Band < ActiveRecord::Base
     bands
   end
 
+  def top_tags
+    (YAML::load(tags) || []) rescue []
+  end
+
   # checks to see if lastfm data is present on the record
   # or if it does, checks too see if it's too old then refreshes the data
   def needs_refresh?
@@ -85,7 +101,12 @@ class Band < ActiveRecord::Base
     self.lastfm_url = band.url
     self.mbid = band.mbid
     self.tracks = band.tracks
-    self.tags = band.tags
+    if band.tags.blank?
+      self.tags = []
+    else
+      self.tags = band.tags
+    end
+
   end
 
   # checks to see if attributes from lastfm are populated
@@ -111,6 +132,33 @@ class Band < ActiveRecord::Base
       self.name
     end
   end
-  
+
+  def fan_base_ratio
+    100 - (plays.to_f / listeners.to_f)
+  end
+
+  def update_score(band)
+    ref_tags = band.top_tags
+    current_tags = self.tags
+
+    if current_tags.blank? || current_tags.size == 0
+      self.score = 0
+    else
+      self.score = (current_tags & ref_tags).size.to_f
+    end
+
+   #plays_i = plays.to_f
+   #listeners_i = listeners.to_f
+   #fan_count_i = fan_count.to_i
+   #metrics = [fan_count_i, listeners_i, plays_i, (plays_i/listeners_i)]
+
+   #sum = metrics.reduce(:+)
+   #metrics = metrics.map{|m| m/sum}
+   #band_score = 0
+   #metrics.each_with_index do |m, idx|
+   #  band_score += m * SCORE_WEIGHTS[idx]
+   #end
+   #self.score = band_score * 100
+  end
 
 end

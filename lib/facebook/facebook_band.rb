@@ -16,7 +16,7 @@ class FacebookBand
 
   # retrieve bands liked by a band
   def self.related(band_id, api_token)
-    query = "SELECT #{band_attributes.join(',')} FROM page WHERE page_id IN (SELECT page_id FROM page_fan WHERE uid=#{band_id} AND type=\"Musician/band\") ORDER BY fan_count DESC LIMIT 5"
+    query = "SELECT #{band_attributes.join(',')} FROM page WHERE page_id IN (SELECT page_id FROM page_fan WHERE uid=#{band_id} AND type=\"Musician/band\") ORDER BY fan_count DESC LIMIT 20"
     execute(query, api_token).map{|r| new(r)}
   end
 

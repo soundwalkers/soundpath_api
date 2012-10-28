@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121028050048) do
+ActiveRecord::Schema.define(:version => 20121028050910) do
 
   create_table "bands", :force => true do |t|
     t.string   "name"
@@ -27,6 +27,7 @@ ActiveRecord::Schema.define(:version => 20121028050048) do
     t.string   "lastfm_name"
     t.text     "tracks"
     t.text     "tags"
+    t.float    "score"
   end
 
   create_table "user_bands", :force => true do |t|
