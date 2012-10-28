@@ -11,14 +11,14 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121027235156) do
+ActiveRecord::Schema.define(:version => 20121028002807) do
 
   create_table "bands", :force => true do |t|
     t.string   "name"
     t.string   "page_id"
     t.string   "plays"
     t.string   "listeners"
-    t.string   "pic_url"
+    t.text     "pic_url"
     t.integer  "fan_count"
     t.string   "lastfm_url"
     t.string   "mbid"
