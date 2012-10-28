@@ -11,9 +11,7 @@ gem 'thin'
 
 gem 'fql'
 
-group :development do
-  gem 'rest-client'
-end
+gem 'rest-client'
 
 
 # To use ActiveModel has_secure_password

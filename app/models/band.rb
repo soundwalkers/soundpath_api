@@ -7,9 +7,14 @@ class Band < ActiveRecord::Base
 
   # multi threaded refreshing of last fm data for the bands
   def self.refresh_lastfm!(bands)
+    threads = []
     bands.each do |band|
-      band.refresh_lastfm!
+      threads << Thread.new do
+        band.refresh_lastfm!
+      end
     end
+    threads.map{|t| t.join}
+    bands
   end
 
   # retrieves the users top liked bands
