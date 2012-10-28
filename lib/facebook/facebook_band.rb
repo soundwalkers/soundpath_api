@@ -3,7 +3,7 @@ class FacebookBand
   attr_accessor :data
 
   # returns all liked artist pages for a user
-  def self.all(api_token, user_id)
+  def self.all(user_id, api_token)
     query = "SELECT #{band_attributes.join(',')} FROM page WHERE page_id IN (SELECT page_id FROM page_fan WHERE uid=#{user_id} AND type=\"Musician/band\") ORDER BY fan_count DESC"
     execute(query, api_token).map{|r| new(r)}
   end
@@ -15,9 +15,9 @@ class FacebookBand
   end
 
   # retrieve bands liked by a band
-  def self.related(api_token, band_id)
-    query = "SELECT #{band_attributes.join(',')} FROM page WHERE page_id IN (SELECT page_id FROM page_fan WHERE uid=#{band_id} AND type=\"Musician/band\") ORDER BY fan_count DESC"
-    new(execute(api_token, band_id))
+  def self.related(band_id, api_token)
+    query = "SELECT #{band_attributes.join(',')} FROM page WHERE page_id IN (SELECT page_id FROM page_fan WHERE uid=#{band_id} AND type=\"Musician/band\") ORDER BY fan_count DESC LIMIT 5"
+    execute(query, api_token).map{|r| new(r)}
   end
 
   # :nodoc:
@@ -31,26 +31,6 @@ class FacebookBand
   # attributes of interest for a band
   def self.band_attributes
     ["page_id", "name", "band_members", "hometown", "current_location", "record_label", "influences", "band_interests", "bio", "fan_count", "pic"]
-  end
-
-
-  # retrieve and update/save bands for a user
-  def self.get_bands_for(user)
-    fbands = all user.token, user.facebook_id
-    bands = []
-    fbands.each do |b|
-      band = Band.where(:page_id => b.page_id.to_s).first_or_initialize
-      band.name = b.name
-      band.fan_count = b.fan_count.to_s
-      band.pic_url = b.pic
-      band.users << user
-      bands << band
-    end
-    return bands
-  end
-
-  def self.get_related_for(band_id)
-
   end
 
   # define methods to conveniently access attributes

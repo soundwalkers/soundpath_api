@@ -15,12 +15,20 @@ class Band < ActiveRecord::Base
     refresh_count = bands.collect(&:expired_data?).delete_if{|r| r.blank?}.size
 
     # if more than 3 bands require a refresh, refresh all the users bands
-    if refresh_count >= 4 || bands.size == 0
-      bands = FacebookBand.get_bands_for user
+#    if refresh_count >= 4 || bands.size == 0
+      user_bands = FacebookBand.all user.facebook_id, user.token
+      bands = create_bands(user_bands, user)
       bands.map{|b| b.save!}
       bands = bands.sort{|b, a| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
-    end
+    #end
     return bands
+  end
+
+  def self.get_related_for(page_id, user)
+    related_bands = FacebookBand.related(page_id, user.token)
+    bands = create_bands(related_bands, user)
+    bands.map{|b| b.save!}
+    bands = bands.sort{|b, a| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
   end
 
   # retrieves details about the band
@@ -34,6 +42,19 @@ class Band < ActiveRecord::Base
 
     band.save!
     band
+  end
+
+  def self.create_bands(fb_bands, user)
+    bands = []
+    fb_bands.each do |b|
+      band = Band.where(:page_id => b.page_id.to_s).first_or_initialize
+      band.name = b.name
+      band.fan_count = b.fan_count.to_s
+      band.pic_url = b.pic
+      band.users << user
+      bands << band
+    end
+    bands
   end
 
   # checks to see if lastfm data is present on the record
