@@ -11,15 +11,14 @@ class Band < ActiveRecord::Base
   def self.retrieve_bands_for(user)
     bands = user.bands.limit(5).order('fan_count DESC')
 
-    #bands that need refreshing
-    refresh_count = bands.collect(&:needs_refresh?).size
+    # bands that need refreshing
+    refresh_count = bands.collect(&:needs_refresh?).size - bands.size
 
-    #if more than 3 bands require a refresh, refresh all the users bands
-    if refresh_count > 3
-      Rails.logger.info "data expired, refresh!"
+    # if more than 3 bands require a refresh, refresh all the users bands
+    if refresh_count > 3 || bands.size == 0
       bands = FacebookBand.get_bands_for user
       bands.map{|b| b.save!}
-      bands = bands.sort{|a, b| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
+      bands = bands.sort{|b, a| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
     end
     return bands
   end
@@ -31,30 +30,36 @@ class Band < ActiveRecord::Base
     band = where(:page_id => page_id).first
     return [] if band.blank?
 
-    refresh_lastfm!
+    band.refresh_lastfm!
 
-    save!
+    band.save!
+    band
   end
 
   # checks to see if lastfm data is present on the record
   # or if it does, checks too see if it's too old then refreshes the data
   def needs_refresh?
-    unless self.has_lastfm_data? || self.expired_data?
-      self.refresh_lastfm!
-    end
+    !self.has_lastfm_data? || self.expired_data?
   end
 
   def refresh_lastfm!
     return unless needs_refresh?
-    band = LastfmBand.find(data)
+    Rails.logger.info "##### \nrefreshing last fm\n ####"
+
+    include_search = self.lastfm_name.blank?
+
+    band = LastfmBand.find(self.name_for_lastfm, include_search)
+
+    return if band.blank?
     self.listeners = band.listeners
     self.plays = self.plays
+    self.lastfm_name = self.name
   end
 
   def refresh_facebook!
   end
 
-  #checks to see if attributes from lastfm are populated
+  # checks to see if attributes from lastfm are populated
   def has_lastfm_data?
     attrs = [:listeners, :plays]
     attr_vals = []
@@ -64,9 +69,18 @@ class Band < ActiveRecord::Base
     attr_vals.all?
   end
 
-  #checks if a records data is expired
+  # checks if a records data is expired
   def expired_data?
     return updated_at < EXPIRE_PERIOD.minutes.ago
+  end
+  
+  # convenience method for retrieving the band name
+  def name_for_lastfm
+    if self.lastfm_name.present?
+      self.lastfm_name
+    else
+      self.name
+    end
   end
   
 

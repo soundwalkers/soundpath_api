@@ -9,7 +9,7 @@ SoundpathApi::Application.load_tasks
 RDoc::Task.new :rdoc do |rdoc|
   rdoc.main = "README.rdoc"
 
-  rdoc.rdoc_files.include("README.rdoc", "doc/*.rdoc", "app/**/*.rb", "lib/*.rb", "config/**/*.rb")
+  rdoc.rdoc_files.include("README.rdoc", "doc/*.rdoc", "app/**/*.rb", "lib/*.rb", "config/**/*.rb", 'lib/*/*.rb')
 
   rdoc.title = "App Documentation"
   rdoc.rdoc_dir = 'public/html'

@@ -14,12 +14,14 @@ class FacebookBand
     execute(query, api_token)
   end
 
+  # :nodoc:
   # execute the query
   def self.execute(query, api_token)
     Rails.logger.info "Executing Fql: #{query}"
     Fql.execute(query, {:access_token => api_token})
   end
 
+  # :nodoc:
   # attributes of interest for a band
   def self.band_attributes
     ["page_id", "name", "band_members", "hometown", "current_location", "record_label", "influences", "band_interests", "bio", "fan_count", "pic"]
@@ -48,6 +50,8 @@ class FacebookBand
     end
   end
 
+  # === Params
+  # * band data from facebook
   def initialize(fb_data)
     @data = fb_data
   end
