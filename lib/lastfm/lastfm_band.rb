@@ -1,5 +1,6 @@
 class LastfmBand 
   attr_accessor :data
+  attr_accessor :tracks, :tags
 
   # === Wrapper method for lastfm search api call
   # === Params: 
@@ -36,7 +37,19 @@ class LastfmBand
       band_name = URI::escape(band_name)
     end
     query = "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&artist=#{band_name}&api_key=#{$LAST_FM_API_KEY}&format=json"
-    return new(execute(query)['artist'])
+    band = new(execute(query)['artist'])
+
+    tracks_query = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=#{URI::escape(band.name)}&api_key=#{$LAST_FM_API_KEY}&format=json"
+    tracks = execute(tracks_query)['toptracks']['track'].to(2).collect{|t| t['name']} rescue ''
+
+    band.tracks = tracks
+
+    tags_query = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist=#{URI::escape(band.name)}&api_key=#{$LAST_FM_API_KEY}&format=json"
+    tags = execute(tags_query)['toptags']['tag'].to(2).collect{|t| t['name']}
+
+    band.tags = tags
+
+    return band
   end
 
 

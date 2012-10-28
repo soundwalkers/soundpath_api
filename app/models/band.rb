@@ -84,6 +84,8 @@ class Band < ActiveRecord::Base
     self.lastfm_name = band.name
     self.lastfm_url = band.url
     self.mbid = band.mbid
+    self.tracks = band.tracks
+    self.tags = band.tags
   end
 
   # checks to see if attributes from lastfm are populated
