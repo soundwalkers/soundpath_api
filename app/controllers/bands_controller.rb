@@ -31,18 +31,38 @@ class BandsController < ApplicationController
   # === Method: GET
   # === Params:
   #   * band_id: The id of the band's facebook page
-  # == Request:
+  # === Request:
   #   * GET http://api_path/band/:band_id
-  # Response
-  #   
-  # Errors:
+  # === Response
+  #  * {\"created_at\":\"2012-10-28T01:48:50Z\",\"fan_count\":14006104,\"id\":43,\"lastfm_name\":\"System of a Down\",\"lastfm_url\":null,\"listeners\":\"2949331\",\"mbid\":null,\"name\":\"System of a Down\",\"page_id\":\"16100944031\",\"pic_url\":\"https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/373050_16100944031_1083812154_s.jpg\",\"plays\":null,\"updated_at\":\"2012-10-28T01:49:46Z\"} 
+  # === Errors:
   #   404 - Band not found
-
   def show
     @band = Band.get_band(params[:id])
     raise_soundpath_error(SoundpathError.new(SoundpathError::BAND_NOT_FOUND)) and return if @band.blank?
 
     respond_with @band
+  end
+
+
+  # == Bands related
+  # ==== Retrieves related bands
+  # === Method: GET
+  # === Params:
+  #   * band_id: The id of the band's facebook page
+  # === Request:
+  #   * GET http://api_path/band/:band_id/related
+  # === Response
+  #  * {\"created_at\":\"2012-10-28T01:48:50Z\",\"fan_count\":14006104,\"id\":43,\"lastfm_name\":\"System of a Down\",\"lastfm_url\":null,\"listeners\":\"2949331\",\"mbid\":null,\"name\":\"System of a Down\",\"page_id\":\"16100944031\",\"pic_url\":\"https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/373050_16100944031_1083812154_s.jpg\",\"plays\":null,\"updated_at\":\"2012-10-28T01:49:46Z\"} 
+  # === Errors:
+  #   404 - Band not found
+  def related
+    @band = Band.get_band(params[:id])
+    raise_soundpath_error(SoundpathError.new(SoundpathError::BAND_NOT_FOUND)) and return if @band.blank?
+
+    @bands = FacebookBand.get_related_for @band.page_id
+
+    respond_with @bands
   end
 
 end

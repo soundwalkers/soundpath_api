@@ -12,10 +12,10 @@ class Band < ActiveRecord::Base
     bands = user.bands.limit(5).order('fan_count DESC')
 
     # bands that need refreshing
-    refresh_count = bands.collect(&:needs_refresh?).size - bands.size
+    refresh_count = bands.collect(&:expired_data?).delete_if{|r| r.blank?}.size
 
     # if more than 3 bands require a refresh, refresh all the users bands
-    if refresh_count > 3 || bands.size == 0
+    if refresh_count >= 4 || bands.size == 0
       bands = FacebookBand.get_bands_for user
       bands.map{|b| b.save!}
       bands = bands.sort{|b, a| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
@@ -44,7 +44,6 @@ class Band < ActiveRecord::Base
 
   def refresh_lastfm!
     return unless needs_refresh?
-    Rails.logger.info "##### \nrefreshing last fm\n ####"
 
     include_search = self.lastfm_name.blank?
 
@@ -71,7 +70,7 @@ class Band < ActiveRecord::Base
 
   # checks if a records data is expired
   def expired_data?
-    return updated_at < EXPIRE_PERIOD.minutes.ago
+    updated_at < EXPIRE_PERIOD.minutes.ago
   end
   
   # convenience method for retrieving the band name
