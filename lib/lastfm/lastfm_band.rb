@@ -29,6 +29,8 @@ class LastfmBand
   #   -last fm band as it is on lastfm
   def self.find(band_name, include_search = false)
     if include_search
+      found_band = self.search(band_name)
+      return nil if found_band.nil?
       band_name = URI::escape(self.search(band_name).name)
     else
       band_name = URI::escape(band_name)

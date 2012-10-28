@@ -7,16 +7,14 @@ class ApplicationController < ActionController::Base
     if params[:token].blank?
       params[:token] = "BAAGm65u5qXgBAJ0RZCiIIKbOyaZApEKfYotSGaXrw03HZB09EP7KykNC8Wt7Puz1XJex5SDRtgH62TBZC7fzdbFfYBzibWRwjT6Uvlx4YmKCIs7CWHdh2ig6TALdqgXKPHSc3MTvNQZDZD"
     end
+    if params[:uid].blank?
       params[:uid] = '1274334424'
+    end
   end
 
   def current_user
-    u = User.where(:facebook_id => params[:uid]).first
-    return nil if u.blank?
-    u.token = params[:token]
-    return u
+    return User.get_user params[:uid], params[:token]
   end
-
 
   def require_user
     raise_soundpath_error(SoundpathError.new(SoundpathError::UNAUTHORIZED_REQUEST ))  unless current_user.present?
