@@ -5,28 +5,31 @@ class Band < ActiveRecord::Base
   # age since last refresh used for data expiration
   EXPIRE_PERIOD = 1
 
+  # multi threaded refreshing of last fm data for the bands
+  def self.refresh_lastfm!(bands)
+    bands.each do |band|
+      band.refresh_lastfm!
+    end
+  end
+
   # retrieves the users top liked bands
   # if the last updated date of the bands is too old
   # it also queries facebook to refresh the data
   def self.retrieve_bands_for(user)
-    bands = user.bands.limit(5).order('fan_count DESC')
 
-    # bands that need refreshing
-    refresh_count = bands.collect(&:expired_data?).delete_if{|r| r.blank?}.size
+    user_bands = FacebookBand.all user.facebook_id, user.token
+    bands = create_bands(user_bands, user)
+    bands = Band.refresh_lastfm!(bands)
+    bands.map{|b| b.save!}
+    bands = bands.sort{|b, a| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
 
-    # if more than 3 bands require a refresh, refresh all the users bands
-#    if refresh_count >= 4 || bands.size == 0
-      user_bands = FacebookBand.all user.facebook_id, user.token
-      bands = create_bands(user_bands, user)
-      bands.map{|b| b.save!}
-      bands = bands.sort{|b, a| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
-    #end
     return bands
   end
 
   def self.get_related_for(page_id, user)
     related_bands = FacebookBand.related(page_id, user.token)
     bands = create_bands(related_bands, user)
+    bands = Band.refresh_lastfm!(bands)
     bands.map{|b| b.save!}
     bands = bands.sort{|b, a| a.fan_count.to_i <=> b.fan_count.to_i}.to(4)
   end
@@ -64,7 +67,7 @@ class Band < ActiveRecord::Base
   end
 
   def refresh_lastfm!
-    return unless needs_refresh?
+    #return unless needs_refresh?
 
     include_search = self.lastfm_name.blank?
 
@@ -72,11 +75,10 @@ class Band < ActiveRecord::Base
 
     return if band.blank?
     self.listeners = band.listeners
-    self.plays = self.plays
-    self.lastfm_name = self.name
-  end
-
-  def refresh_facebook!
+    self.plays = band.plays
+    self.lastfm_name = band.name
+    self.lastfm_url = band.url
+    self.mbid = band.mbid
   end
 
   # checks to see if attributes from lastfm are populated

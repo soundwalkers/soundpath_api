@@ -12,10 +12,8 @@ class LastfmBand
 
 
     if artist.is_a? Array
-      Rails.logger.info "IS ARRAY"
       d = artist.first
     elsif artist.is_a? Hash
-      Rails.logger.info "IS NOT ARRAY"
       d = artist
     end
     
@@ -71,7 +69,7 @@ class LastfmBand
   end
 
   def plays
-    data['playcount']
+    data['stats']['playcount']
   end
 
   def url
